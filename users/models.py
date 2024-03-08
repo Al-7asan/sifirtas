@@ -27,8 +27,12 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(phone_number, date_of_birth, gender, email, password, **extra_fields)
 
 
-class CustomUser(AbstractBaseUser, PermissionsMixin):
+class Address(models.Model):
+    address = models.CharField(max_length=255)
+    city = models.CharField(max_length=255)
 
+
+class CustomUser(AbstractBaseUser, PermissionsMixin):
     GENDER_CHOICES = [
         ('M', _('Male')),
         ('F', _('Female')),
@@ -38,7 +42,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(max_length=15, unique=True)
     date_of_birth = models.DateField()
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
-
+    address = models.ManyToManyField(Address)
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'phone_number'
@@ -58,6 +62,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         current_date = datetime.now()
 
         # Calculate the difference in years
-        age = current_date.year - birth_date.year - ((current_date.month, current_date.day) < (birth_date.month, birth_date.day))
+        age = current_date.year - birth_date.year - (
+                (current_date.month, current_date.day) < (birth_date.month, birth_date.day))
 
         return age
